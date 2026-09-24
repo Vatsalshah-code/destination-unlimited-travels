@@ -1,0 +1,106 @@
+{% extends "client_base.html" %}
+
+{% block title %}Track Application Status | Visa & Passport Portal{% endblock %}
+
+{% block content %}
+<div class="client-container" style="max-width: 780px;">
+  <div class="client-hero" style="padding: 2rem 2.25rem; margin-bottom: 2rem;">
+    <div class="ssl-pill" style="margin-bottom: 0.85rem; background: rgba(255,255,255,0.18); border-color: rgba(255,255,255,0.3); color: #ffffff;">
+      <span>🔍</span> Real-Time Application Tracking
+    </div>
+    <h1 class="client-hero-title" style="font-size: 1.85rem;">Track Your Application Status</h1>
+    <p class="client-hero-desc" style="font-size: 0.95rem;">
+      Check the real-time review status of your passport or visa documents using your unique Client ID and registered contact info.
+    </p>
+  </div>
+
+  <!-- Search Card -->
+  <div class="form-card" style="padding: 1.75rem;">
+    <form id="trackForm">
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label" for="trackClientId">
+            Client ID / Reference Number <span class="required-star">*</span>
+          </label>
+          <input type="text" id="trackClientId" class="form-input" placeholder="e.g. VISA-2026-0001" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="trackContact">
+            Registered Email or Mobile <span class="required-star">*</span>
+          </label>
+          <input type="text" id="trackContact" class="form-input" placeholder="e.g. client@example.com" required>
+        </div>
+      </div>
+
+      <div style="margin-top: 1rem;">
+        <button type="submit" id="trackBtn" class="btn btn-primary btn-block">
+          <span id="trackSpinner" style="display: none; animation: spin 1s linear infinite;">⏳</span>
+          Search Application
+        </button>
+      </div>
+    </form>
+
+    <!-- Error Alert -->
+    <div id="errorAlert" style="display: none; margin-top: 1.25rem; background: #fee2e2; border: 1px solid #ef4444; border-radius: var(--radius-sm); padding: 0.85rem 1rem; color: #991b1b; font-size: 0.875rem;">
+      <span id="errorText"></span>
+    </div>
+  </div>
+
+  <!-- Results Card -->
+  <div id="resultCard" class="form-card" style="display: none; padding: 2rem;">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem;">
+      <div>
+        <span style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase;">Application Details</span>
+        <h2 style="font-size: 1.4rem; color: #0f172a;" id="outClientName"></h2>
+        <div style="font-family: ui-monospace, monospace; font-size: 1.1rem; font-weight: 700; color: #1e40af;" id="outClientId"></div>
+      </div>
+      <div>
+        <span id="outStatus" class="badge"></span>
+      </div>
+    </div>
+
+    <!-- Stepper -->
+    <div style="margin-bottom: 2rem;">
+      <div style="font-size: 0.85rem; font-weight: 700; color: #475569; margin-bottom: 0.75rem;">PROGRESS TIMELINE</div>
+      <div style="display: flex; justify-content: space-between; position: relative;">
+        <div id="stepSubmitted" style="flex: 1; text-align: center;">
+          <div style="width: 32px; height: 32px; border-radius: 50%; background: #059669; color: #fff; margin: 0 auto; display: flex; align-items: center; justify-content: center; font-size: 0.85rem;">✓</div>
+          <div style="font-size: 0.75rem; font-weight: 600; margin-top: 0.35rem;">Submitted</div>
+        </div>
+        <div id="stepReview" style="flex: 1; text-align: center;">
+          <div style="width: 32px; height: 32px; border-radius: 50%; background: #e2e8f0; color: #475569; margin: 0 auto; display: flex; align-items: center; justify-content: center; font-size: 0.85rem;">2</div>
+          <div style="font-size: 0.75rem; font-weight: 600; margin-top: 0.35rem;">Under Review</div>
+        </div>
+        <div id="stepProcessing" style="flex: 1; text-align: center;">
+          <div style="width: 32px; height: 32px; border-radius: 50%; background: #e2e8f0; color: #475569; margin: 0 auto; display: flex; align-items: center; justify-content: center; font-size: 0.85rem;">3</div>
+          <div style="font-size: 0.75rem; font-weight: 600; margin-top: 0.35rem;">Processing</div>
+        </div>
+        <div id="stepCompleted" style="flex: 1; text-align: center;">
+          <div style="width: 32px; height: 32px; border-radius: 50%; background: #e2e8f0; color: #475569; margin: 0 auto; display: flex; align-items: center; justify-content: center; font-size: 0.85rem;">4</div>
+          <div style="font-size: 0.75rem; font-weight: 600; margin-top: 0.35rem;">Completed</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Metadata Details Grid -->
+    <div class="form-grid-2" style="font-size: 0.9rem; background: #f8fafc; padding: 1.25rem; border-radius: var(--radius-sm); margin-bottom: 1.5rem;">
+      <div><strong>Service:</strong> <span id="outService"></span></div>
+      <div><strong>Country:</strong> <span id="outCountry"></span></div>
+      <div><strong>Submission Date:</strong> <span id="outSubmitted"></span></div>
+      <div><strong>Last Activity:</strong> <span id="outUpdated"></span></div>
+      <div><strong>Verified Documents:</strong> <span id="outDocCount"></span> files</div>
+    </div>
+
+    <!-- Documents List -->
+    <div>
+      <h3 style="font-size: 1rem; color: #1e293b; margin-bottom: 0.75rem;">Verified Uploaded Files</h3>
+      <div id="docsList"></div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/tracking.js"></script>
+{% endblock %}
