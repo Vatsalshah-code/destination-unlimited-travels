@@ -1,0 +1,304 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Case Officer Management Console | VisaFlow{% endblock %}
+
+{% block content %}
+<div class="container-wide" style="padding-top: 1.75rem;">
+  <div style="margin-bottom: 1.75rem;">
+    <h1 style="font-size: 1.65rem; color: #0f172a; letter-spacing: -0.02em;">Applicant Dossiers & Document Verification</h1>
+    <p style="font-size: 0.85rem; color: #64748b;">
+      Internal staff console: inspect private document vaults, update application statuses, and export embassy packages.
+    </p>
+  </div>
+
+  <!-- Metric Overview Cards -->
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <div class="metric-icon-wrap" style="background: #eff6ff; color: #1e40af;">📂</div>
+      <div>
+        <div class="metric-number" id="metricTotal">{{ metrics.total_clients }}</div>
+        <div class="metric-label">Total Submissions</div>
+      </div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-icon-wrap" style="background: #fef3c7; color: #b45309;">⏳</div>
+      <div>
+        <div class="metric-number" id="metricNew">{{ metrics.new_count }}</div>
+        <div class="metric-label">New Applications</div>
+      </div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-icon-wrap" style="background: #e0e7ff; color: #4338ca;">🔍</div>
+      <div>
+        <div class="metric-number" id="metricUnderReview">{{ metrics.under_review }}</div>
+        <div class="metric-label">Under Staff Review</div>
+      </div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-icon-wrap" style="background: #fee2e2; color: #b91c1c;">⚠️</div>
+      <div>
+        <div class="metric-number" id="metricPendingDocs">{{ metrics.additional_docs_required + metrics.documents_pending }}</div>
+        <div class="metric-label">Pending / Action Req.</div>
+      </div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-icon-wrap" style="background: #dcfce7; color: #15803d;">✅</div>
+      <div>
+        <div class="metric-number" id="metricCompleted">{{ metrics.completed_count }}</div>
+        <div class="metric-label">Completed Files</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Table Card -->
+  <div class="table-card">
+    <!-- Toolbar: Search & Filters -->
+    <div class="table-toolbar">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="Search by Client ID, Name, Mobile, Email, Ref No...">
+      </div>
+
+      <div class="filter-group">
+        <!-- Filter by Service -->
+        <select id="serviceFilter" class="form-select" style="min-width: 170px;">
+          <option value="">All Services</option>
+          {% for s in services %}
+          <option value="{{ s }}">{{ s }}</option>
+          {% endfor %}
+        </select>
+
+        <!-- Filter by Status -->
+        <select id="statusFilter" class="form-select" style="min-width: 170px;">
+          <option value="">All Statuses</option>
+          {% for st in statuses %}
+          <option value="{{ st }}">{{ st }}</option>
+          {% endfor %}
+        </select>
+
+        <button id="refreshBtn" class="btn btn-secondary btn-sm" title="Refresh Table">
+          🔄 Refresh
+        </button>
+      </div>
+    </div>
+
+    <!-- Data Table -->
+    <div class="data-table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Client ID</th>
+            <th>Name & Email</th>
+            <th>Mobile</th>
+            <th>Service</th>
+            <th>Country</th>
+            <th>Submitted</th>
+            <th>Status</th>
+            <th>Files</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="clientTableBody">
+          <!-- Populated by JS -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Loading State -->
+    <div id="tableLoading" style="text-align: center; padding: 2.5rem; display: none;">
+      <span style="font-size: 1.5rem; animation: spin 1s linear infinite;">⏳</span>
+      <p style="color: var(--text-muted); font-size: 0.875rem; margin-top: 0.5rem;">Loading client records...</p>
+    </div>
+
+    <!-- Empty State -->
+    <div id="emptyState" style="text-align: center; padding: 3rem; display: none;">
+      <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📭</div>
+      <h3 style="color: #475569;">No client records match the criteria.</h3>
+      <p style="color: #94a3b8; font-size: 0.85rem;">Try adjusting your search terms or filters.</p>
+    </div>
+
+    <!-- Table Footer / Pagination -->
+    <div style="padding: 1rem 1.5rem; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background: #fcfdfe;">
+      <span id="paginationInfo" style="font-size: 0.85rem; color: var(--text-muted);">Showing 0 records</span>
+      <div style="display: flex; gap: 0.5rem;">
+        <button id="prevPageBtn" class="btn btn-secondary btn-sm" disabled>Previous</button>
+        <button id="nextPageBtn" class="btn btn-secondary btn-sm" disabled>Next</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== CLIENT DETAIL MODAL ==================== -->
+<div class="modal-overlay" id="clientDetailModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div>
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <span style="font-family: ui-monospace, monospace; font-size: 1.3rem; font-weight: 800; color: #1e40af;" id="modalClientId"></span>
+          <span id="modalStatusBadge" class="badge"></span>
+        </div>
+        <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem;">Complete Client Record & Private Document Vault</div>
+      </div>
+      <button class="modal-close" id="closeClientModal">&times;</button>
+    </div>
+
+    <div class="modal-body">
+      <!-- Section A: Client Information -->
+      <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1.5rem;">
+        <h3 style="font-size: 1rem; color: #1e293b; margin-bottom: 0.75rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.4rem;">
+          Personal & Service Information
+        </h3>
+        <div class="form-grid-3" style="font-size: 0.875rem;">
+          <div><strong style="color: #64748b;">Full Name:</strong> <div id="modalClientName" style="font-weight: 600; color: #0f172a;"></div></div>
+          <div><strong style="color: #64748b;">Email Address:</strong> <div id="modalClientEmail"></div></div>
+          <div><strong style="color: #64748b;">Phone Number:</strong> <div id="modalClientMobile"></div></div>
+          <div><strong style="color: #64748b;">Date of Birth:</strong> <div id="modalClientDob"></div></div>
+          <div><strong style="color: #64748b;">Destination Country:</strong> <div id="modalClientCountry"></div></div>
+          <div><strong style="color: #64748b;">Service Required:</strong> <div id="modalClientService" style="font-weight: 600; color: #1e40af;"></div></div>
+          <div><strong style="color: #64748b;">Reference Number:</strong> <div id="modalClientRefNo"></div></div>
+          <div><strong style="color: #64748b;">Submitted On:</strong> <div id="modalClientSubmitted"></div></div>
+        </div>
+        <div style="margin-top: 0.75rem; font-size: 0.875rem;">
+          <strong style="color: #64748b;">Residential Address:</strong>
+          <div id="modalClientAddress" style="color: #334155; margin-top: 0.15rem;"></div>
+        </div>
+
+        <!-- Quick Contact Toolbar -->
+        <div style="display: flex; gap: 0.75rem; margin-top: 1rem; border-top: 1px solid #e2e8f0; padding-top: 0.75rem; flex-wrap: wrap;">
+          <a id="whatsappLink" href="#" target="_blank" class="btn btn-success btn-sm">
+            💬 WhatsApp Client
+          </a>
+          <a id="telLink" href="#" class="btn btn-secondary btn-sm">
+            📞 Direct Phone Call
+          </a>
+          <button id="openContactModalBtn" class="btn btn-primary btn-sm">
+            ✉️ Send Direct Message/Email
+          </button>
+        </div>
+      </div>
+
+      <!-- Section B: Status Management -->
+      <div style="background: #ffffff; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1.5rem;">
+        <h3 style="font-size: 1rem; color: #1e293b; margin-bottom: 0.75rem;">
+          Application Status Management
+        </h3>
+        <div style="display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap;">
+          <div style="flex: 1; min-width: 220px;">
+            <label class="form-label">Update Status</label>
+            <select id="modalStatusSelect" class="form-select">
+              {% for st in statuses %}
+              <option value="{{ st }}">{{ st }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div style="flex: 2; min-width: 250px;">
+            <label class="form-label">Status Update Reason / Note for Client</label>
+            <input type="text" id="statusNoteInput" class="form-input" placeholder="e.g. Please upload a clearer scan of your Aadhaar back side.">
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 0.4rem;">
+            <label style="font-size: 0.75rem; display: flex; align-items: center; gap: 0.35rem; color: #475569;">
+              <input type="checkbox" id="notifyClientCheckbox" checked> Send email update to client
+            </label>
+            <button id="updateStatusBtn" class="btn btn-primary btn-sm">
+              Update Status
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section C: Uploaded Documents Grid & ZIP Download -->
+      <div style="margin-bottom: 1.75rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+          <div>
+            <h3 style="font-size: 1.05rem; color: #1e293b;">Uploaded Documents Vault</h3>
+            <span style="font-size: 0.775rem; color: var(--text-muted);">
+              Stored strictly in private disk directory: <code>data/secure_storage/{client_id}/</code>
+            </span>
+          </div>
+          <button id="downloadAllZipBtn" class="btn btn-secondary btn-sm" title="Download all documents packaged as a ZIP archive">
+            📦 Download All as ZIP Archive
+          </button>
+        </div>
+
+        <div class="doc-card-grid" id="modalDocList">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Section D: Staff Internal Notes & Audit Trail -->
+      <div class="form-grid-2">
+        <!-- Internal Notes -->
+        <div style="border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1rem;">
+          <h4 style="font-size: 0.9rem; color: #1e293b; margin-bottom: 0.5rem;">Staff Internal Notes (Private)</h4>
+          <div class="notes-container" id="modalNotesList"></div>
+          <div style="margin-top: 0.75rem; display: flex; gap: 0.5rem;">
+            <input type="text" id="newNoteText" class="form-input" placeholder="Write internal note..." style="font-size: 0.85rem;">
+            <button id="addNoteBtn" class="btn btn-secondary btn-sm">Add</button>
+          </div>
+        </div>
+
+        <!-- Audit Trail -->
+        <div style="border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1rem;">
+          <h4 style="font-size: 0.9rem; color: #1e293b; margin-bottom: 0.5rem;">Compliance Audit Trail</h4>
+          <div style="max-height: 250px; overflow-y: auto;" id="modalAuditList"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="modal-footer">
+      <button id="deleteClientBtn" class="btn btn-danger btn-sm" style="margin-right: auto;">
+        🗑️ Delete Client Record & Purge Files
+      </button>
+      <button class="btn btn-secondary" onclick="document.getElementById('clientDetailModal').classList.remove('active')">
+        Close
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== DOCUMENT PREVIEW MODAL ==================== -->
+<div class="modal-overlay" id="previewModal" style="z-index: 120;">
+  <div class="modal-content" style="max-width: 950px; max-height: 92vh;">
+    <div class="modal-header">
+      <h3 class="modal-title" id="previewModalTitle">Document Preview</h3>
+      <button class="modal-close" id="closePreviewModal">&times;</button>
+    </div>
+    <div class="modal-body" id="previewContainer" style="padding: 0; background: #334155; min-height: 400px; display: flex; align-items: center; justify-content: center;">
+      <!-- Streamed via iframe or img -->
+    </div>
+  </div>
+</div>
+
+<!-- ==================== CONTACT CLIENT MODAL ==================== -->
+<div class="modal-overlay" id="contactModal" style="z-index: 110;">
+  <div class="modal-content" style="max-width: 600px;">
+    <div class="modal-header">
+      <h3 class="modal-title">Contact Client</h3>
+      <button class="modal-close" id="closeContactModal">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Subject</label>
+        <input type="text" id="contactSubject" class="form-input">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Message</label>
+        <textarea id="contactMessage" class="form-textarea" style="min-height: 120px;" placeholder="Type your message to the applicant..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="document.getElementById('contactModal').classList.remove('active')">Cancel</button>
+      <button id="sendContactBtn" class="btn btn-primary">Dispatch Message</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/admin_dashboard.js"></script>
+{% endblock %}
