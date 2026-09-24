@@ -1,0 +1,78 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Staff Admin Login | Visa & Passport Portal{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 460px; margin-top: 3rem;">
+  <div class="form-card" style="padding: 2.25rem;">
+    <div style="text-align: center; margin-bottom: 1.75rem;">
+      <img src="/static/images/destination_unlimited_logo.jpg" alt="Destination Unlimited Travels Logo" style="height: 64px; margin-bottom: 0.75rem; object-fit: contain;">
+      <h1 style="font-size: 1.4rem; color: #0f172a;">Destination Unlimited Travels</h1>
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem;">
+        Staff & Case Officer Management Portal
+      </p>
+    </div>
+
+    <!-- Error Banner -->
+    <div id="loginError" style="display: none; background: #fee2e2; border: 1px solid #ef4444; border-radius: var(--radius-sm); padding: 0.75rem 1rem; margin-bottom: 1.25rem; color: #991b1b; font-size: 0.85rem;">
+      <span id="loginErrorText"></span>
+    </div>
+
+    <form id="adminLoginForm">
+      <div class="form-group">
+        <label class="form-label" for="loginEmail">Staff Email</label>
+        <input type="email" id="loginEmail" class="form-input" placeholder="name@company.com" required autocomplete="username">
+      </div>
+
+      <div class="form-group" style="margin-top: 1rem;">
+        <label class="form-label" for="loginPassword">Password</label>
+        <input type="password" id="loginPassword" class="form-input" placeholder="Enter your password" required autocomplete="current-password">
+      </div>
+
+      <div style="margin-top: 1.75rem;">
+        <button type="submit" id="loginBtn" class="btn btn-primary btn-block btn-lg">
+          <span id="loginSpinner" style="display:none; animation: spin 1s linear infinite;">⏳</span>
+          Log In to Dashboard
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.getElementById("adminLoginForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const email = document.getElementById("loginEmail").value.trim();
+    const password = document.getElementById("loginPassword").value;
+    const errorBox = document.getElementById("loginError");
+    const errorText = document.getElementById("loginErrorText");
+    const btn = document.getElementById("loginBtn");
+    const spinner = document.getElementById("loginSpinner");
+
+    errorBox.style.display = "none";
+    btn.disabled = true;
+    spinner.style.display = "inline-block";
+
+    try {
+      const res = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.detail || "Authentication failed.");
+      }
+      window.location.href = data.redirect_url || "/admin/dashboard";
+    } catch (err) {
+      errorText.textContent = err.message;
+      errorBox.style.display = "block";
+    } finally {
+      btn.disabled = false;
+      spinner.style.display = "none";
+    }
+  });
+</script>
+{% endblock %}
