@@ -1,0 +1,13 @@
+[
+  "tests/test_full_workflow.py::test_01_public_form_renders",
+  "tests/test_full_workflow.py::test_02_client_one_submission_creates_record_and_isolated_storage",
+  "tests/test_full_workflow.py::test_03_client_two_submission_isolated_independently",
+  "tests/test_full_workflow.py::test_04_client_self_service_tracking",
+  "tests/test_full_workflow.py::test_05_admin_unauthorized_access_blocked",
+  "tests/test_full_workflow.py::test_06_admin_login_and_table_queries",
+  "tests/test_full_workflow.py::test_07_admin_document_view_and_download",
+  "tests/test_full_workflow.py::test_08_admin_download_all_zip",
+  "tests/test_full_workflow.py::test_09_admin_status_update_and_notes",
+  "tests/test_full_workflow.py::test_10_csv_export",
+  "tests/test_full_workflow.py::test_11_client_record_deletion_and_storage_wipe"
+]
