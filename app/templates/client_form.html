@@ -1,0 +1,403 @@
+{% extends "client_base.html" %}
+
+{% block title %}Client Document Submission | Visa & Passport Portal{% endblock %}
+
+{% block content %}
+<div class="client-container">
+  <!-- Client Consumer Hero -->
+  <div class="client-hero">
+    <div class="ssl-pill" style="margin-bottom: 1.25rem; background: rgba(255,255,255,0.18); border-color: rgba(255,255,255,0.3); color: #ffffff;">
+      <span>🔒</span> Official Client Document Intake
+    </div>
+    <h1 class="client-hero-title">Submit Your Visa & Passport Documents</h1>
+    <p class="client-hero-desc">
+      Welcome to your secure client submission portal. Please enter your application details and upload your required identification and financial files. Your records are isolated in an encrypted vault and accessed solely by your designated case officer.
+    </p>
+    <div class="client-hero-features">
+      <span>🛡️ End-to-End Encrypted Storage</span>
+      <span>📁 Strictly Isolated Client Vault</span>
+      <span>⚡ 24-Hour Review Turnaround</span>
+      <span>📜 Data Privacy Compliant</span>
+    </div>
+  </div>
+
+  <!-- Stepper Indicator -->
+  <div class="stepper-bar">
+    <div class="step-item active">
+      <div class="step-circle">1</div>
+      <span>Personal Info</span>
+    </div>
+    <div style="color:#cbd5e1; align-self:center;">—</div>
+    <div class="step-item active">
+      <div class="step-circle">2</div>
+      <span>Service & Travel</span>
+    </div>
+    <div style="color:#cbd5e1; align-self:center;">—</div>
+    <div class="step-item active">
+      <div class="step-circle">3</div>
+      <span>Upload Documents</span>
+    </div>
+    <div style="color:#cbd5e1; align-self:center;">—</div>
+    <div class="step-item">
+      <div class="step-circle">4</div>
+      <span>Review & Submit</span>
+    </div>
+  </div>
+
+  <!-- Error Alert Banner -->
+  <div id="errorAlert" style="display: none; background: #fee2e2; border: 1px solid #ef4444; border-radius: var(--radius-md); padding: 1rem 1.25rem; margin-bottom: 1.5rem; color: #991b1b; display: flex; align-items: center; gap: 0.75rem;">
+    <span style="font-size: 1.25rem;">⚠️</span>
+    <span id="errorText"></span>
+  </div>
+
+  <form id="clientIntakeForm" enctype="multipart/form-data">
+    <!-- Section 1: Personal Details -->
+    <div class="form-card">
+      <div class="section-header">
+        <div class="step-num">1</div>
+        <div>
+          <h2 class="section-title">Client Information</h2>
+          <div style="font-size: 0.85rem; color: var(--text-muted);">Enter personal information exactly as shown on your government ID.</div>
+        </div>
+      </div>
+
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label" for="fullName">
+            Full Name <span class="required-star">*</span>
+          </label>
+          <input type="text" id="fullName" class="form-input" placeholder="e.g. Johnathan Alexander Doe" required>
+          <span class="form-help">Include first, middle, and surname.</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="email">
+            Email Address <span class="required-star">*</span>
+          </label>
+          <input type="email" id="email" class="form-input" placeholder="client@example.com" required>
+          <span class="form-help">Confirmation and status updates will be sent here.</span>
+        </div>
+      </div>
+
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label" for="mobile">
+            Mobile Number <span class="required-star">*</span>
+          </label>
+          <input type="tel" id="mobile" class="form-input" placeholder="+91 98765 43210" required>
+          <span class="form-help">Include country code for verification.</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="dob">
+            Date of Birth <span class="required-star">*</span>
+          </label>
+          <input type="date" id="dob" class="form-input" required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="address">
+          Residential Address <span class="required-star">*</span>
+        </label>
+        <textarea id="address" class="form-textarea" placeholder="Flat/House No., Street, City, State, Postal Code, Country" required></textarea>
+      </div>
+    </div>
+
+    <!-- Section 2: Service & Travel Details -->
+    <div class="form-card">
+      <div class="section-header">
+        <div class="step-num">2</div>
+        <div>
+          <h2 class="section-title">Service Details</h2>
+          <div style="font-size: 0.85rem; color: var(--text-muted);">Specify the visa or passport service you require.</div>
+        </div>
+      </div>
+
+      <div class="form-grid-3">
+        <div class="form-group">
+          <label class="form-label" for="service">
+            Service Required <span class="required-star">*</span>
+          </label>
+          <select id="service" class="form-select" required>
+            <option value="" disabled selected>Select service</option>
+            {% for s in services %}
+            <option value="{{ s }}">{{ s }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="country">
+            Country of Travel <span class="required-star">*</span>
+          </label>
+          <input type="text" id="country" class="form-input" placeholder="e.g. United States, United Kingdom, Canada, UAE" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="referenceNo">
+            Application / Reference Number
+          </label>
+          <input type="text" id="referenceNo" class="form-input" value="{{ ref_param }}" placeholder="Optional reference (e.g. REF-8821)">
+          <span class="form-help">If provided by your agency or previous filing.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 3: Document Upload Center -->
+    <div class="form-card">
+      <div class="section-header">
+        <div class="step-num">3</div>
+        <div>
+          <h2 class="section-title">Document Upload Center</h2>
+          <div style="font-size: 0.85rem; color: var(--text-muted);">
+            Accepted formats: <strong>PDF, JPG, PNG, WEBP</strong> (Max 10MB per file). Clean, high-resolution scans recommended.
+          </div>
+        </div>
+      </div>
+
+      <div class="upload-grid">
+        <!-- 1. Passport -->
+        <div class="upload-slot" id="passportSlot">
+          <div>
+            <div class="slot-header">
+              <span class="slot-title">📘 Passport (Bio-Data & Address)</span>
+              <span class="slot-badge required">Mandatory</span>
+            </div>
+            <p class="slot-desc">Clear color scan of first page (photo/bio) and last page (address/signature).</p>
+            <div class="file-preview-box" id="passportPreview">
+              <div class="file-info-text">
+                <span class="file-name-text" id="passportName"></span>
+                <span class="file-meta-text" id="passportMeta"></span>
+              </div>
+              <button type="button" class="file-remove-btn" id="passportRemove" title="Remove">✕</button>
+            </div>
+          </div>
+          <div>
+            <input type="file" id="passportInput" accept=".pdf,.jpg,.jpeg,.png,.webp" style="display:none;">
+            <button type="button" class="slot-btn" onclick="document.getElementById('passportInput').click()">
+              📁 Select Passport File
+            </button>
+          </div>
+        </div>
+
+        <!-- 2. Aadhaar Card -->
+        <div class="upload-slot" id="aadhaarSlot">
+          <div>
+            <div class="slot-header">
+              <span class="slot-title">🪪 Aadhaar Card</span>
+              <span class="slot-badge required">Mandatory</span>
+            </div>
+            <p class="slot-desc">Front and back side scan or full e-Aadhaar PDF copy.</p>
+            <div class="file-preview-box" id="aadhaarPreview">
+              <div class="file-info-text">
+                <span class="file-name-text" id="aadhaarName"></span>
+                <span class="file-meta-text" id="aadhaarMeta"></span>
+              </div>
+              <button type="button" class="file-remove-btn" id="aadhaarRemove" title="Remove">✕</button>
+            </div>
+          </div>
+          <div>
+            <input type="file" id="aadhaarInput" accept=".pdf,.jpg,.jpeg,.png,.webp" style="display:none;">
+            <button type="button" class="slot-btn" onclick="document.getElementById('aadhaarInput').click()">
+              📁 Select Aadhaar File
+            </button>
+          </div>
+        </div>
+
+        <!-- 3. PAN Card -->
+        <div class="upload-slot" id="panSlot">
+          <div>
+            <div class="slot-header">
+              <span class="slot-title">💳 PAN Card</span>
+              <span class="slot-badge">Recommended</span>
+            </div>
+            <p class="slot-desc">Front clear scan showing PAN number, photo, and signature clearly.</p>
+            <div class="file-preview-box" id="panPreview">
+              <div class="file-info-text">
+                <span class="file-name-text" id="panName"></span>
+                <span class="file-meta-text" id="panMeta"></span>
+              </div>
+              <button type="button" class="file-remove-btn" id="panRemove" title="Remove">✕</button>
+            </div>
+          </div>
+          <div>
+            <input type="file" id="panInput" accept=".pdf,.jpg,.jpeg,.png,.webp" style="display:none;">
+            <button type="button" class="slot-btn" onclick="document.getElementById('panInput').click()">
+              📁 Select PAN Card
+            </button>
+          </div>
+        </div>
+
+        <!-- 4. Photograph -->
+        <div class="upload-slot" id="photoSlot">
+          <div>
+            <div class="slot-header">
+              <span class="slot-title">📷 Passport-Size Photograph</span>
+              <span class="slot-badge required">Mandatory</span>
+            </div>
+            <p class="slot-desc">Recent photograph (35x45mm), white background, 80% face coverage.</p>
+            <div class="file-preview-box" id="photoPreview">
+              <div class="file-info-text">
+                <span class="file-name-text" id="photoName"></span>
+                <span class="file-meta-text" id="photoMeta"></span>
+              </div>
+              <button type="button" class="file-remove-btn" id="photoRemove" title="Remove">✕</button>
+            </div>
+          </div>
+          <div>
+            <input type="file" id="photoInput" accept=".jpg,.jpeg,.png,.webp" style="display:none;">
+            <button type="button" class="slot-btn" onclick="document.getElementById('photoInput').click()">
+              📁 Select Photograph
+            </button>
+          </div>
+        </div>
+
+        <!-- 5. Bank Documents -->
+        <div class="upload-slot" id="bankDocsSlot">
+          <div>
+            <div class="slot-header">
+              <span class="slot-title">🏦 Bank Documents</span>
+              <span class="slot-badge">Financial Proof</span>
+            </div>
+            <p class="slot-desc">Last 3 to 6 months bank statement with bank seal/stamp or e-statement.</p>
+            <div class="file-preview-box" id="bankDocsPreview">
+              <div class="file-info-text">
+                <span class="file-name-text" id="bankDocsName"></span>
+                <span class="file-meta-text" id="bankDocsMeta"></span>
+              </div>
+              <button type="button" class="file-remove-btn" id="bankDocsRemove" title="Remove">✕</button>
+            </div>
+          </div>
+          <div>
+            <input type="file" id="bankDocsInput" accept=".pdf,.jpg,.jpeg,.png" style="display:none;">
+            <button type="button" class="slot-btn" onclick="document.getElementById('bankDocsInput').click()">
+              📁 Select Bank Statement
+            </button>
+          </div>
+        </div>
+
+        <!-- 6. Previous Visa -->
+        <div class="upload-slot" id="prevVisaSlot">
+          <div>
+            <div class="slot-header">
+              <span class="slot-title">✈️ Previous Visa</span>
+              <span class="slot-badge">If Applicable</span>
+            </div>
+            <p class="slot-desc">Copy of previous visa stamps for the destination or other Schengen/US/UK countries.</p>
+            <div class="file-preview-box" id="prevVisaPreview">
+              <div class="file-info-text">
+                <span class="file-name-text" id="prevVisaName"></span>
+                <span class="file-meta-text" id="prevVisaMeta"></span>
+              </div>
+              <button type="button" class="file-remove-btn" id="prevVisaRemove" title="Remove">✕</button>
+            </div>
+          </div>
+          <div>
+            <input type="file" id="prevVisaInput" accept=".pdf,.jpg,.jpeg,.png" style="display:none;">
+            <button type="button" class="slot-btn" onclick="document.getElementById('prevVisaInput').click()">
+              📁 Select Previous Visa
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 7. Supporting Documents (Multiple files allowed) -->
+      <div class="upload-slot" id="supSlot" style="margin-top: 1.25rem;">
+        <div>
+          <div class="slot-header">
+            <span class="slot-title">📎 Supporting Documents (Multiple Files Allowed)</span>
+            <span class="slot-badge">Add Multiple</span>
+          </div>
+          <p class="slot-desc">
+            Upload any extra documents (Flight itinerary, Hotel bookings, Employment letter, Invitation letter, NOC, Income Tax Returns).
+          </p>
+          <div id="supDocsList"></div>
+        </div>
+        <div>
+          <input type="file" id="supDocsInput" accept=".pdf,.jpg,.jpeg,.png,.webp" multiple style="display:none;">
+          <button type="button" class="slot-btn" onclick="document.getElementById('supDocsInput').click()">
+            ➕ Add Supporting Document(s)
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 4: Privacy Policy & Consent Declaration -->
+    <div class="form-card">
+      <div class="section-header">
+        <div class="step-num">4</div>
+        <div>
+          <h2 class="section-title">Privacy Notice & Client Consent</h2>
+          <div style="font-size: 0.85rem; color: var(--text-muted);">Data Protection & Confidentiality Commitment</div>
+        </div>
+      </div>
+
+      <div class="privacy-box">
+        <strong>🔒 Sensitive Document Protection Notice:</strong>
+        <p style="margin-top: 0.35rem;">
+          We treat your passport, Aadhaar, financial records, and personal identity documents with the utmost confidentiality. 
+          Your documents are saved strictly into an isolated, private file storage folder designated solely for your application. 
+          They are never stored in public directories and are accessible exclusively to authorized case officers for the sole purpose 
+          of visa and passport filing.
+        </p>
+        <p style="margin-top: 0.5rem;">
+          In accordance with applicable data protection laws, your records are subject to strict audit logging and can be deleted upon request once processing is finalized.
+        </p>
+      </div>
+
+      <label class="consent-checkbox-wrap">
+        <input type="checkbox" id="consentCheckbox" name="consent_given" required>
+        <span>
+          I confirm that all information provided is accurate and truthful. I hereby authorize the case officers to securely process and store my identity and financial documents solely for my visa/passport application processing.
+        </span>
+      </label>
+
+      <!-- Submit Button -->
+      <div style="margin-top: 2rem;">
+        <button type="submit" id="submitBtn" class="client-submit-btn">
+          <span id="submitSpinner" style="display: none; animation: spin 1s linear infinite;">⏳</span>
+          <span id="btnText">Submit All Documents Securely</span>
+        </button>
+      </div>
+    </div>
+  </form>
+
+  <!-- Client FAQ & Support Section -->
+  <div class="faq-section">
+    <div class="faq-title">
+      <span>❓</span> Frequently Asked Questions by Applicants
+    </div>
+    <div class="faq-grid">
+      <div class="faq-item">
+        <div class="faq-question">How are my sensitive documents protected?</div>
+        <div class="faq-answer">
+          All uploaded files (Passport, Aadhaar, PAN, Bank Statements) are immediately stored in an isolated, private file directory created solely for your client ID. They are never exposed to public links.
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question">What file formats and sizes are allowed?</div>
+        <div class="faq-answer">
+          You can upload PDF documents or clear high-resolution JPG, PNG, and WEBP image files up to 10MB each.
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question">What happens after I submit?</div>
+        <div class="faq-answer">
+          You will instantly receive your unique Client Reference ID and an email confirmation. Your designated case officer will review your documents within 24 business hours.
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question">Can I check my application status later?</div>
+        <div class="faq-answer">
+          Yes! You can visit the <a href="/track" style="color:#0284c7; font-weight:600;">Track My Application</a> page at any time using your Client ID and registered phone/email.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/client_form.js"></script>
+{% endblock %}
