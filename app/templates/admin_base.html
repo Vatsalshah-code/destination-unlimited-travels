@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Staff Console | VisaFlow Document Operations{% endblock %}</title>
+  <link rel="stylesheet" href="/static/css/styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛡️</text></svg>">
+  {% block head_extra %}{% endblock %}
+</head>
+<body style="background-color: #0f172a; color: #0f172a;">
+  <!-- Dedicated Internal Staff Top Bar -->
+  <header style="background: #0f172a; border-bottom: 1px solid #1e293b; padding: 0.85rem 2rem; color: #ffffff;" class="no-print">
+    <div style="max-width: 1440px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+      <div style="display: flex; align-items: center; gap: 0.85rem;">
+        <img src="/static/images/destination_unlimited_logo.jpg" alt="Destination Unlimited Travels Logo" style="height: 44px; width: auto; object-fit: contain; background: #ffffff; border-radius: 6px; padding: 2px;">
+        <div>
+          <div style="font-size: 1.15rem; font-weight: 800; color: #f8fafc; letter-spacing: -0.01em;">
+            Destination Unlimited Travels <span style="color: #60a5fa; font-weight: 600; font-size: 0.95rem;">• Staff Console</span>
+          </div>
+          <div style="font-size: 0.65rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.08em;">
+            Visa & Passport Operations Console
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 1.25rem;">
+        {% if admin %}
+        <div style="display: flex; align-items: center; gap: 0.5rem; background: #1e293b; padding: 0.35rem 0.85rem; border-radius: 9999px; border: 1px solid #334155; font-size: 0.8rem; color: #e2e8f0;">
+          <span style="display:inline-block; width:8px; height:8px; background:#22c55e; border-radius:50%;"></span>
+          <span>{{ admin.email }}</span>
+          <span style="background: #3b82f6; color: #fff; font-size: 0.65rem; padding: 0.1rem 0.4rem; border-radius: 4px; font-weight: 700;">{{ admin.role }}</span>
+        </div>
+        {% endif %}
+
+        <!-- Notification Bell -->
+        <div style="position: relative;">
+          <button id="notifBell" style="background: #1e293b; border: 1px solid #334155; color: #f1f5f9; padding: 0.4rem 0.85rem; border-radius: 6px; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 0.4rem;">
+            🔔 Alerts
+            {% if unread_notifications and unread_notifications|length > 0 %}
+            <span id="notifBadge" style="background: #ef4444; color: #ffffff; border-radius: 9999px; font-size: 0.65rem; padding: 0.1rem 0.4rem; font-weight: bold;">
+              {{ unread_notifications|length }}
+            </span>
+            {% endif %}
+          </button>
+
+          <!-- Drawer -->
+          <div id="notifDropdown" style="display: none; position: absolute; right: 0; top: 125%; width: 340px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); z-index: 100; overflow: hidden; color: #0f172a;">
+            <div style="padding: 0.75rem 1rem; background: #f8fafc; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+              <strong style="font-size: 0.85rem;">Incoming Staff Alerts</strong>
+              <button id="markReadBtn" style="background: none; border: none; font-size: 0.75rem; color: #2563eb; cursor: pointer; font-weight: 600;">Mark all read</button>
+            </div>
+            <div id="notifList" style="max-height: 280px; overflow-y: auto;">
+              {% if unread_notifications and unread_notifications|length > 0 %}
+                {% for n in unread_notifications %}
+                <div style="padding: 0.75rem 1rem; border-bottom: 1px solid #f1f5f9; font-size: 0.8rem;">
+                  <div style="font-weight: 600; color: #0f172a;">{{ n.title }}</div>
+                  <div style="color: #64748b; font-size: 0.75rem; margin-top: 0.25rem;">{{ n.created_at }}</div>
+                </div>
+                {% endfor %}
+              {% else %}
+                <div style="padding: 1.5rem; text-align: center; color: #94a3b8; font-size: 0.8rem;">No unread alerts</div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Export CSV -->
+        <a href="/api/admin/export-csv" style="background: #1e293b; border: 1px solid #334155; color: #f1f5f9; padding: 0.4rem 0.85rem; border-radius: 6px; font-size: 0.8rem; text-decoration: none; display: flex; align-items: center; gap: 0.35rem;" download>
+          📥 Export CSV
+        </a>
+
+        <!-- Logout -->
+        <button id="logoutBtn" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #fca5a5; padding: 0.4rem 0.85rem; border-radius: 6px; font-size: 0.8rem; cursor: pointer;">
+          🚪 Sign Out
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Staff Content -->
+  <main style="background-color: #f8fafc; min-height: calc(100vh - 120px);">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Staff Internal Footer -->
+  <footer style="background: #0f172a; border-top: 1px solid #1e293b; padding: 1.25rem 2rem; text-align: center; color: #64748b; font-size: 0.775rem;" class="no-print">
+    <div style="max-width: 1440px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+      <div>
+        🔒 Confidential Internal Staff Terminal • Visa & Passport Documentation Console
+      </div>
+      <div>
+        Role-based access enforced • All actions audit-logged to database
+      </div>
+    </div>
+  </footer>
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>
