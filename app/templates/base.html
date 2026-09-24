@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Visa & Passport Client Document Management System{% endblock %}</title>
+  <link rel="stylesheet" href="/static/css/styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛂</text></svg>">
+  {% block head_extra %}{% endblock %}
+</head>
+<body>
+  <!-- Top Navigation -->
+  <header class="navbar no-print">
+    <a href="/upload-documents" class="brand-logo">
+      <div class="brand-icon">🛂</div>
+      <div>
+        <span>VisaFlow Docs</span>
+        <div style="font-size: 0.65rem; color: #64748b; font-weight: normal; letter-spacing: 0.05em; text-transform: uppercase;">
+          Secure Client Document Portal
+        </div>
+      </div>
+    </a>
+    <nav class="nav-links">
+      <a href="/upload-documents" class="nav-link {% if request.url.path == '/upload-documents' %}active{% endif %}">
+        📝 Client Upload Form
+      </a>
+      <a href="/track" class="nav-link {% if request.url.path == '/track' %}active{% endif %}">
+        🔍 Track Application
+      </a>
+      <a href="/admin/dashboard" class="nav-link {% if '/admin' in request.url.path %}active{% endif %}">
+        🔒 Staff Admin
+      </a>
+    </nav>
+  </header>
+
+  <!-- Main Content Area -->
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Footer -->
+  <footer style="border-top: 1px solid var(--border-color); padding: 2rem 1.5rem; text-align: center; color: var(--text-muted); font-size: 0.85rem; background: #ffffff; margin-top: 4rem;" class="no-print">
+    <div style="max-width: 1000px; margin: 0 auto; display: flex; flex-direction: column; gap: 0.75rem; align-items: center;">
+      <div style="display: flex; gap: 1.5rem; font-weight: 500;">
+        <span>🔒 256-Bit Encrypted Storage</span>
+        <span>🛡️ Data Privacy Compliant</span>
+        <span>📋 Dedicated Client Isolation</span>
+      </div>
+      <div>
+        &copy; 2026 Visa & Passport Client Document Management System. All documents are stored in secure, private non-public directories with role-based staff access controls.
+      </div>
+    </div>
+  </footer>
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>
