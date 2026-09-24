@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Client Document Submission Portal | Official Visa & Passport Intake{% endblock %}</title>
+  <link rel="stylesheet" href="/static/css/styles.css">
+  <link rel="stylesheet" href="/static/css/client.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛂</text></svg>">
+  {% block head_extra %}{% endblock %}
+</head>
+<body>
+  <!-- Dedicated Public Client Header (Completely isolated from staff portal) -->
+  <header class="client-navbar no-print">
+    <a href="/upload-documents" class="client-brand" style="display:flex; align-items:center; gap:0.85rem; text-decoration:none;">
+      <img src="/static/images/destination_unlimited_logo.jpg" alt="Destination Unlimited Travels Logo" style="height: 52px; width: auto; object-fit: contain; border-radius: 4px;">
+      <div>
+        <div class="client-brand-title" style="font-size: 1.25rem; font-weight: 800; color: #0f172a;">Destination Unlimited Travels</div>
+        <div class="client-brand-subtitle" style="font-size: 0.72rem; color: #dc2626; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">
+          Air | Hotel | Holiday Package | Visa
+        </div>
+      </div>
+    </a>
+    
+    <nav class="client-nav-right">
+      <a href="/upload-documents" class="client-nav-link {% if request.url.path == '/upload-documents' %}active{% endif %}">
+        📝 Submit Documents
+      </a>
+      <a href="/track" class="client-nav-link {% if request.url.path == '/track' %}active{% endif %}">
+        🔍 Track My Application
+      </a>
+      <div class="ssl-pill">
+        🔒 256-Bit SSL Encrypted
+      </div>
+    </nav>
+  </header>
+
+  <!-- Client Content Area -->
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Client-Facing Footer -->
+  <footer style="border-top: 1px solid #e2e8f0; padding: 2rem 1.5rem; text-align: center; color: #64748b; font-size: 0.825rem; background: #ffffff; margin-top: 4rem;" class="no-print">
+    <div style="max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 0.6rem; align-items: center;">
+      <div style="display: flex; gap: 1.5rem; font-weight: 600; color: #334155; font-size: 0.85rem;">
+        <span>🛡️ Official Document Intake</span>
+        <span>🔒 Private Client Isolation</span>
+        <span>⚖️ Data Privacy & Consent Compliant</span>
+      </div>
+      <div>
+        This is a private, secure link provided to you for submitting identity, passport, and financial documents. 
+        Your uploaded documents are stored in an encrypted vault accessible solely to your assigned visa case officer.
+      </div>
+      <div style="color: #94a3b8; font-size: 0.75rem;">
+        Need assistance? Email client support at <a href="mailto:support@visaflow.com" style="color: #2563eb;">support@visaflow.com</a>.
+      </div>
+    </div>
+  </footer>
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>
