@@ -1,0 +1,3 @@
+{
+  "tests/test_full_workflow.py::test_01_public_form_renders": true
+}
